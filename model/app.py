@@ -58,10 +58,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Load Model ───────────────────────────────────────────────────
-@st.cache_resource
 def load_model():
-    model  = pickle.load(open("model/logistic_model.pkl", "rb"))
-    scaler = pickle.load(open("model/scaler.pkl",         "rb"))
+    import pandas as pd
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.model_selection import train_test_split
+
+    df = pd.read_csv("dataset/students.csv")
+    X = df[["hours_studied","attendance","prev_score","assignments_done"]]
+    y = df["result"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    model = LogisticRegression(random_state=42)
+    model.fit(X_train_scaled, y)
     return model, scaler
 
 model, scaler = load_model()
